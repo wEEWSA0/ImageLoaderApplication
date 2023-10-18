@@ -1,0 +1,24 @@
+version: '3.4'
+
+networks:
+  image-loader-project:
+    driver: bridge
+
+services:
+  image-loader-db:
+    image: postgres:latest
+    container_name: image-loader-db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=image_loader_db
+    ports:
+      - "5433:5432"
+    restart: always
+    volumes:
+      - app-data:/var/lib/postgresql/data
+    networks:
+      - image-loader-project
+    
+volumes:
+  app-data:
