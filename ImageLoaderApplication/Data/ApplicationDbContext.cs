@@ -4,8 +4,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-using static Npgsql.PostgresTypes.PostgresCompositeType;
-
 namespace ImageLoaderApplication.Data;
 public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<long>, long>
 {

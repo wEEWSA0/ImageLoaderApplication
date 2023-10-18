@@ -14,6 +14,16 @@ public class FriendsRepository
 
     public void AddFriends(Friends friends)
     {
+        if (_dbContext.Friends.Contains(friends))
+        {
+            return;
+        }
+
+        if (friends.UserId == friends.FriendId)
+        {
+            return;
+        }
+
         _dbContext.Friends.Add(friends);
 
         _dbContext.SaveChanges();

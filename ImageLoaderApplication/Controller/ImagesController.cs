@@ -3,6 +3,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using System;
+
 namespace ImageLoaderApplication.Controller;
 
 [ApiController]
@@ -44,7 +46,7 @@ public class ImagesController : ControllerBase
 
         if (user is null)
         {
-            return BadRequest();
+            return Unauthorized();
         }
 
         _imageRepository.AddImage(new()
@@ -59,22 +61,37 @@ public class ImagesController : ControllerBase
     [HttpGet("{guid}")]
     public IActionResult GetImage(Guid guid)
     {
-        var image = _imageRepository.GetImage(guid);
+        var user = _userRepository.GetUser(HttpContext.User.Identity!.Name!);
 
-        if (image is null)
+        if (user is null)
         {
-            return NotFound();
+            return Unauthorized();
+        }
+        
+        var imageResult = _imageRepository.GetImage(guid, user.Id);
+
+        if (imageResult.Data is null)
+        {
+            return StatusCode(imageResult.StatusCode);
         }
 
-        var filePath = Path.Combine(_path, guid + ".jpg"); // Предполагается, что изображения хранятся в формате JPG
+        var fileContent = LoadImage(guid);
 
-        if (System.IO.File.Exists(filePath))
+        return fileContent is null ? NotFound() : fileContent;
+    }
+
+    private FileContentResult? LoadImage(Guid guid)
+    {
+        var filePath = Path.Combine(_path, guid + ".jpg");
+        // Предполагается, что изображения хранятся в формате JPG
+
+        if (!System.IO.File.Exists(filePath))
         {
-            var fileBytes = System.IO.File.ReadAllBytes(filePath);
-            return File(fileBytes, "image/jpeg");
+            return null;
         }
 
-        return NotFound();
+        var fileBytes = System.IO.File.ReadAllBytes(filePath);
+        return File(fileBytes, "image/jpeg");
     }
 }
 
